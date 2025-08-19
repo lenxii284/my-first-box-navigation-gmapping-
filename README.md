@@ -1,4 +1,4 @@
-# 使用`nav+gmap`实现两轮差速`ROS`小车的建图与导航
+# 使用`nav+gmap`实现两轮差速`ROS`小车的建图与导航并实现人体识别和语音交互导航
 本项目基于思岚-A1激光雷达，使用 `Gmapping` 进行`SLAM`建图，并通过 `ROS Navigation Stack` 实现自主导航。包含雷达驱动配置、`Gmapping`参数优化、地图保存及导航（全局/局部路径规划、`AMCL`定位）的全部内容。适用于机器人自主探索、室内导航等场景，提供详细的参数配置指南和启动脚本，帮助快速部署。
 ## 主要功能
 - `Gmapping`建图
@@ -110,5 +110,29 @@ ros2 launch daohang nav.launch.py
 #完成nav.launch.py文件的启动后，再开一个新的终端，启动Rviz
 ```
 完成以上操作后可以看见`rviz`中已经正确加载我们的地图，但是此时`rviz`中会出现`tf`相关的错误，这是因为此时还没由设定机器人的初始位置，在`rviz`的工具栏中选择`2D Pose Estimate`单击机器人在地图中目前所在的大概位置，拖动鼠标调整机器人朝向，若觉得不够准确可以多次调整，然后使用`Nav2 Goal`给定目标点与朝向，让机器人自主进行导航。
+
+### 启动语音交互导航
+- 在完成以上启动导航功能的基础下，启动`duodian`文件下的`yvying_jiaohu_daohang.py`文件用于初始化导航位置，其次启动`ros_listener.py`文件用于监听语音大模型发送的导航命令
+```python
+#启动yvying_jiaohu_daohang文件
+ros2 run duodian yvying_jiaohu_daohang
+
+#启动语音监听节点(启动前请确认语音大模型与机器人处于同一网络下，并修改文件内顶端的ip地址)
+ros2 run duodian ros_listener
+
+#可启动shiyan文件用于测试导航节点是否正确（启动前请在文件内解开需要的代码注释或添加需要的测试代码）
+ros2 run duodian shiyan
+```
+完成以上操作后，请根据语音大模型模块的介绍通过语音交互发布导航命令
+
+### 启动YOLO人体识别导航
+- 和启动语音交互功能一样，在启动导航功能的基础上，启动`duodian`文件下的`renti_shibi_daohang.py`文件
+```python
+ros2 run duodian renti_shibi_daohang
+```
+启动以上文件后，当机器人识别到人后便会自动向特定话题发布信息，`ros`端接收到信息后便会前往对方身边。
+
+
+
 # 结语
-以上文件只包括了`ros`控制方面的代码未包括`stm32`端的底盘控制代码，`stm32`端只需完成底盘速度的发布与接收功能即可。
+以上文件只包括了`ros`控制方面的代码未包括语音模块，`YOLO`模块，`stm32`端的底盘控制代码，`stm32`端只需完成底盘速度的发布与接收功能即可。
